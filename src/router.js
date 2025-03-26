@@ -10,14 +10,14 @@ const router= new Router({
     mode: 'history',
     routes: [
         {
-            path: '/rapid-triples/',
+            path: '/pko-rapid-triples/',
             name: 'asset_create',
             component: AssetCreate,
             props: {
-                asset_type : 'MyRDFClass'
+                asset_type : 'Procedure'
             },
             meta: {
-                title: "Cefriel RDF Metadata Generator",
+                title: "Cefriel PKO Procedure Generator",
             }
         },
     ]

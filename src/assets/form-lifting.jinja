@@ -1,80 +1,268 @@
-{%- set prefix="https://knowledge.c-innovationhub.com/cefriel/data/" -%}
-{%- set dcat_content = obj.header -%}
-{%- set json_content = obj.content -%}
-{%- set asset_name = slugify(dcat_content.name) -%}
-{%- set asset_type = dcat_content.type -%}
-{%- set asset_id = '<' + prefix + asset_type + '#' + asset_name + '>' -%}
-{%- set catalogue_id= '<' + prefix + 'CefrielDataCatalogue#' + asset_type + '>' -%}
-{%- set catalogue_record_id = '<' + prefix + 'CefrielDataCatalogueRecord/' + asset_type + '#' + asset_name + '>' -%}
-{%- set asset_type_url = data_platform_url + '/assets/' + asset_name -%}
+{%- set prefix = "http://perks-project.eu/data/" -%}
+{%- set procedure_id = slugify(obj.title) -%}
+{%- set procedure_type = "Procedure" -%}
+{%- set procedure_iri = '<' + prefix + procedure_type + '/' + procedure_id + '>' -%}
+{%- set user_iri = '<' + prefix + 'user/' + obj.user + '>' -%}
 
+@prefix data: <{{prefix}}> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dcat: <https://www.w3.org/ns/dcat#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix vcard: <http://www.w3.org/2006/vcard/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix schema: <https://schema.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix m4ing: <http://w3id.org/nfdi4ing/metadata4ing#> .
+@prefix pplan: <http://purl.org/net/p-plan#> .
+@prefix pko: <https://w3id.org/pko#> .
+@prefix pko-ind: <https://w3id.org/pko/industry#> .
 
-{{catalogue_id | safe}} rdf:type dcat:Catalog;
-	dcterms:title "Cefriel RDF Form-based Generator";
-	dcterms:description "Cefriel RDF Form-based Generator powered by KCONG"@en;
-	dcterms:publisher [
-	    rdf:type foaf:Agent;
-	    foaf:name "Data Publisher";
-	    foaf:mbox "no-reply@cefriel.com";
-	];
-	dcterms:dataset {{asset_id | safe}};
-	dcat:record {{catalogue_record_id | safe}};
-	foaf:homepage <https://kcong.cefriel.com/>.
+{# MACRO RENDER REFERENCES #}
+{% macro renderReferences(references) %}
+  {% for ref in references %}
+  dcterms:references [
+    dcterms:title """{{ref.title}}""";
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/{{ref.format}}> ;
+    {% if ref.resource %}
+    {% if ref.resource.key == "Local" %}
+    dcat:accessURL <{{remote_url}}{{ref.resource.attachment.url}}> ;
+    {% elif ref.resource.key == "Image" %}
+    dcat:accessURL <{{remote_url}}{{ref.resource.url}}> ;
+    {% else %}
+    dcat:accessURL <{{ref.resource.url}}> ;
+    {% endif %}
+    {% endif %}
+    a dcat:Resource
+  ] ;
+  {% endfor %}
+{% endmacro %}
 
+{# MACRO RENDER FUNCTIONS #}
+{% macro renderFunction(function) %}
+{%- set function_iri = '<' + prefix + 'Function/' + slugify(function.title) + '>' -%}
+{{function_iri | safe}} a pko:Function ;
+  dcterms:title "{{function.title}}"^^xsd:string .
+{% endmacro %}
 
-{{catalogue_record_id | safe}} rdf:type dcat:CatalogRecord ;
-	dcterms:modified "{{dcat_content.last_updated}}"^^xsd:dateTime ;
-	dcterms:created "{{dcat_content.creation_time}}"^^xsd:dateTime ;
-	foaf:primaryTopic {{asset_id  | safe}} .
+{# MACRO RENDER ACTIONS #}
+{% macro renderAction(action) %}
+{%- set action_iri = '<' + prefix + 'Action/' + slugify(action.title) + '>' -%}
+{{action_iri | safe}} a pko:Action ;
+  dcterms:title "{{action.title}}"^^xsd:string .
+{% endmacro %}
 
+{# MACRO RENDER INPUT/OUTPUT VARIABLES #}
+{% macro renderVar(var) %}
+{%- set var_iri = '<' + prefix + 'Variable/' + slugify(var.title) + '>' -%}
+{{var_iri | safe}} a pplan:Variable ;
+  dcterms:title "{{var.title}}"^^xsd:string .
+{% endmacro %}
 
-{{asset_id | safe}} rdf:type dcat:Dataset;
-    dcterms:identifier """{{dcat_content.identifier}}""";
-    dcterms:title "{{dcat_content.name}}";
-    {%if dcat_content.publisher_name or dcat_content.publisher_email %}
-    dcterms:publisher [
-	    rdf:type foaf:Agent;
-      {%if dcat_content.publisher_name %}
-	    foaf:name "{{dcat_content.publisher_name}}";
-      {%endif%}
-      {%if dcat_content.publisher_email %}
-	    foaf:mbox "{{dcat_content.publisher_email}}";
-      {%endif%}
-    ];
-    {%endif%}
+{# MACRO RENDER STEP #}
+{% macro renderStep(step, step_iri, step_id) %}
 
-    {%-if json_content.source_asset.id-%}
-    dcterms:source <{{json_content.source_asset.id}}>;
-    {%-endif-%}
+{% set rendered_step = slugify(step.title) %}
 
-    dcterms:description """{{dcat_content.description}}""" .
+{{step_iri | safe}} 
+  dcterms:title "{{step.title}}"^^xsd:string ;
+  {% if step.description %}
+  dcterms:description """{{step.description}}"""^^xsd:string ;
+  {% endif %}
 
+{% if step.isOptional and step.isRepeatablePolicy and not step.isRepeatablePolicy.minRepetitions %}
+  pko:minRepetitions 0 ;
+{% endif %}
 
-  {%if json_content.distributions %}
-  {%- for distribution in json_content.distributions -%}
-  {%- set distribution_id = '<' + prefix + asset_type + '/Distribution#' + asset_name + '-' + loop.index + '>' -%}
-  {{asset_id | safe}} dcat:distribution {{distribution_id | safe}} .
+{% if step.isRepeatablePolicy %}
+  {% if step.isRepeatablePolicy.minRepetitions %} 
+  pko:minRepetitions {{step.isRepeatablePolicy.minRepetitions}} ;
+  {% endif %}
+  {% if step.isRepeatablePolicy.maxRepetitions %} 
+  pko:maxRepetitions {{step.isRepeatablePolicy.maxRepetitions}} ;
+  {% endif %}
+{% endif %}
 
-  {{distribution_id | safe}} rdf:type dcat:Distribution;
-    dcterms:format "{{distribution.format}}";
-	  {%-if json_content.data_sample -%}
-    {%- for sample in json_content.data_sample -%}
-    adms:sample [
-      rdf:type dcat:Distribution;
-      dcat:downloadURL <{{sample.url}}>;
-      {%-if sample.sample_description -%}
-      dcterms:description """{{sample.sample_description}}"""
-      {%- endif -%}
-    ];
-    {%- endfor -%}
-	  {%- endif -%}
-	dcat:accessURL <{{distribution.access_url}}> .
-  {%- endfor -%}
-  {%- endif -%}
+{% if step.references %}
+{{ renderReferences(step.references) }}
+{% endif %}
+
+{% if step.requiresFunction %}
+  {% for function in step.requiresFunction %}
+  {%- set function_iri = '<' + prefix + 'Function/' + slugify(function.title) + '>' -%}
+  pko:requiresFunction {{function_iri | safe}} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.requiresAction %}
+  {% for action in step.requiresAction %}
+  {%- set action_iri = '<' + prefix + 'Action/' + slugify(action.title) + '>' -%}
+  pko:requiresAction {{action_iri | safe}} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.hasInputVar %}
+  {% for var in step.hasInputVar %}
+  {%- set var_iri = '<' + prefix + 'Variable/' + slugify(var.title) + '>' -%}
+  pplan:hasInputVar {{var_iri | safe}} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.hasOutputVar %}
+  {% for var in step.hasOutputVar %}
+  {%- set var_iri = '<' + prefix + 'Variable/' + slugify(var.title) + '>' -%}
+  pplan:hasOutputVar {{var_iri | safe}} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.hasStepVerification %}
+  {% for vf in step.hasStepVerification %}
+  pko:hasStepVerification [
+    a pko:StepVerification ;
+    dcterms:title "{{vf.title}}";
+    {% if obj.description %}
+    dcterms:description """{{vf.description}}"""^^xsd:string ;
+    {% endif %}
+  ] ;
+  {% endfor %}
+{% endif %}
+
+dcterms:identifier "{{slugify(step.title)}}"^^xsd:string .
+
+  {# MULTISTEP #}
+  {% if step.hasStep | length > 0 %}
+    {# Reference shape #}
+    {{step_iri | safe}} <https://vocab.sti2.at/ds/compliesWith> <https://semantify.it/ds/LqnDrczMkpxx> ;
+    a pplan:MultiStep .
+
+    {{ renderMultiStep(step.hasStep, step_iri | safe, step_id|string, step.hasStepPolicy) }}
+  {% else %}
+    {{step_iri | safe}} <https://vocab.sti2.at/ds/compliesWith> <https://semantify.it/ds/gFBlAqMqgdhR> ;
+    a pplan:Step .
+  {% endif %}
+
+{% if step.hasNextStep | length > 0 %}
+
+  {% if step.nextStepPolicy == 'Alternative' %}
+
+    {% for nextAlternativeStep in step.hasNextStep %}
+    {%- set next_step_iri = '<' + prefix + procedure_type + '/' + procedure_id + '/Step/' + slugify(nextAlternativeStep.title) + '>' -%}
+    {{step_iri | safe}} pko:nextAlternativeStep {{next_step_iri | safe}} .
+    {{procedure_iri | safe}} pko:hasStep {{next_step_iri | safe}} .
+
+    {{ renderStep(nextAlternativeStep, next_step_iri, step_id|string + "." + loop.index|string) }}
+    {% endfor %}
+
+  {% else %}
+    {{ renderStepSequence(step.hasNextStep, step_iri | safe, step_id|string) }}
+  {% endif %}
+{% endif %}
+
+{% endmacro %}
+
+{# MACRO RENDER MULTISTEP or PROCEDURE STEPS #}
+{# hasStepPolicy is Ordered and Unordered #}
+{% macro renderMultiStep(stepSequence, ms_step_iri, starting_step_id, hasStepPolicy) %}
+
+{% for step in stepSequence %}
+
+{%- set c_step_s = loop.index -%}
+{%- set c_step_iri = '<' + prefix + procedure_type + '/' + procedure_id + '/Step/' + slugify(step.title) + '>' -%}
+
+{% if hasStepPolicy == "Ordered" %}
+  {% if loop.index > 1 %}
+  {%- set p_step_s = loop.index - 2 -%}
+  {%- set p_step = stepSequence[p_step_s] -%}
+  {%- set previous_step_iri = '<' + prefix + procedure_type + '/' + procedure_id + '/Step/' + slugify(p_step.title) + '>' -%}
+  {{previous_step_iri | safe}} pko:nextStep {{c_step_iri | safe}} .
+  {% else %}
+  {{ms_step_iri | safe}} pko:hasFirstStep {{c_step_iri | safe}} .
+  {% endif %}
+{% endif %}
+{{ms_step_iri | safe}} pko:hasStep {{c_step_iri | safe}} .
+
+{% if starting_step_id != "" %}
+{{ renderStep( step, c_step_iri, starting_step_id | string + "." + loop.index | string ) }}
+{% else %}
+{{ renderStep( step, c_step_iri, loop.index ) }}
+{% endif %}
+
+{% endfor %}
+
+{% endmacro %}
+
+{# MACRO RENDER STEP SEQUENCE #}
+{% macro renderStepSequence(stepSequence, starting_step_iri, starting_step_id) %}
+
+{% for step in stepSequence %}
+{% if loop.index > 1 %}
+{%- set p_step_s = loop.index - 1 -%}
+{%- set p_step = stepSequence[p_step_s] -%}
+{%- set previous_step_iri = '<' + prefix + procedure_type + '/' + procedure_id + '/Step/' + slugify(p_step.title) + '>' -%}
+{% endif %}
+
+{%- set c_step_s = loop.index -%}
+{%- set c_step_iri = '<' + prefix + procedure_type + '/' + procedure_id + '/Step/' + slugify(step.title) + '>' -%}
+
+{{starting_step_iri | safe}} pko:nextStep {{c_step_iri | safe}} .
+{{procedure_iri | safe}} pko:hasStep {{c_step_iri | safe}} .
+
+{% if starting_step_id != "" %}
+{{ renderStep( step, c_step_iri, starting_step_id | string + "." + loop.index | string ) }}
+{% else %}
+{{ renderStep( step, c_step_iri, loop.index ) }}
+{% endif %}
+
+{% endfor %}
+
+{% endmacro %}
+
+{{procedure_iri | safe}} a pko:Procedure ;
+  {# Reference shape #}
+  <https://vocab.sti2.at/ds/compliesWith> <https://semantify.it/ds/fcKvHmTCPrxp> ;
+  dcterms:title "{{obj.title}}"^^xsd:string ;
+  {% if obj.description %}
+  dcterms:description """{{obj.description}}"""^^xsd:string ;
+  {% endif %}
+  {% if obj.isAdoptedBy %}
+  pko:isAdoptedBy data:{{slugify(obj.isAdoptedBy)}} ;
+  {% endif %}
+
+  {% if obj.versionNumber %}
+  pko:versionNumber "{{obj.versionNumber}}"^^xsd:string ;
+  {% endif %}
+  
+  {% if obj.hasProcedureTarget %}
+  {% for target in obj.hasProcedureTarget %}
+  pko:hasProcedureTarget [
+    a pko-ind:Machine ;
+    dcterms:title "{{target.title}}"^^xsd:string ;
+    pko:hasMachineType data:MachineType\/{{target.machineType | replace(" " , "")}} ;
+    prov:atLocation data:Location\/{{target.atLocation | replace(" " , "")}}
+  ] ;
+  {% endfor %}
+	{% endif %}
+
+  {% if obj.references %}
+  {{ renderReferences(obj.references) }}
+	{% endif %}
+
+  {% if obj.keyword %}
+  {% for keyword in obj.keyword %}
+  dcat:keyword "{{keyword}}"^^xsd:string ;
+  {% endfor %}
+	{% endif %}
+
+  dcterms:identifier "{{obj.id}}" ;
+  adms:status pko:{{slugify(obj.status) | capitalize }} ;
+  dcterms:creator {{user_iri | safe}} ; 
+  dcterms:created "{{obj.created}}"^^xsd:dateTime ;
+  dcterms:modified "{{obj.modified}}"^^xsd:dateTime .
+
+  {%- set ms_step_iri = procedure_iri | safe -%}
+  {%- set starting_step_id = "" -%}
+  {{ renderMultiStep(obj.hasStep, ms_step_iri, "", "Ordered") }}

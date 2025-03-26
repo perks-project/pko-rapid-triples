@@ -11,6 +11,19 @@
                 contain
                 /></router-link>
         <v-toolbar-title>{{app_name}}</v-toolbar-title>
+        <v-spacer></v-spacer>
+
+        <router-link
+            to="/"
+            >
+            <v-img
+                class="mx-2"
+                v-bind:src="project_logo"
+                max-height="40"
+                max-width="100"
+                contain
+                />
+        </router-link>
     </v-app-bar>
 </template>
 
@@ -19,8 +32,9 @@
         name: 'App',
         data() {
             return {
-                app_name: 'rapid-triples: RDF Form-based Generator',
+                app_name: 'pko-rapid-triples: PKO Procedure Form-based Generator',
                 app_logo: require('@/assets/cefriel_clogo.png'),
+                project_logo: require('@/assets/perks_logo.png'),
                 path_items: [],
             }
         },

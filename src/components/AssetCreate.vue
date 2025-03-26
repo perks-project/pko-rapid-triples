@@ -1,18 +1,29 @@
 <template>
   <div>
-    <PageTitle :title="asset_type" :show_breadcrumbs="true"/>
     <v-row class="px-10 my-2">
       <v-col cols="8" class="py-2">
-        <p>Fill the form with all the metadata and download the corresponding RDF. Test and experiment to learn how different
-          information should be described in RDF according to the considered specification.<br><br>
+        <p>Fill the form to obtain a procedure compliant with the <a href="https://w3id.org/pko">PKO ontology</a>.<br><br>
           The page is client-side only so all the information inserted are not collected/stored but can not be retrieved
-          if the page is reloaded. The output RDF can be converted to different serializations.<br><br>
+          if the page is reloaded without downloading the content. The output RDF can be converted to different serializations.<br><br>
           This page is powered by <b>KCONG (Knowledge Catalogue and Governance)</b> a complete (meta)data catalogue
           solution developed by <a href="https://www.cefriel.com/">Cefriel</a>. If you want to know more visit <a
               href="https://kcong.cefriel.com/">https://kcong.cefriel.com/</a>.</p>
       </v-col>
-      <v-col cols="4" class="text-center py-2">
-        <img src="@/assets/logo.png" alt="Company Logo" style="max-height: 100px;">
+    </v-row>
+
+    <v-row class="px-10 mt-6 mb-10">
+      <v-col cols="8">
+        <v-row>
+          <v-btn @click="initForm" class="ml-2 mt-2 mr-4">
+            <v-icon left>mdi-upload</v-icon>
+            Initialise Form
+          </v-btn>
+          <input ref="formInput" type="file" accept="application/json" style="display:none" @change="onUploadedForm">
+          <v-btn @click="downloadForm" class="mt-2">
+            <v-icon left>mdi-download</v-icon>
+            Download
+          </v-btn>
+        </v-row>
       </v-col>
     </v-row>
 
@@ -63,7 +74,6 @@
 <script>
 import JsonForm from './JsonForm';
 import Alert from './Alert.vue';
-import PageTitle from './PageTitle.vue';
 
 import Ajv from "ajv";
 const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
@@ -78,7 +88,6 @@ export default {
   name: 'AssetCreate',
   components: {
     JsonForm,
-    PageTitle,
     Alert
   },
   props: ['asset_type'],
@@ -158,7 +167,59 @@ export default {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     },
+    initForm() {
+      this.$refs.formInput.click();
+    },
+    downloadForm() {
+      const jsonString = JSON.stringify(this.asset, null, 2); 
 
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `procedure-export.json`);
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    },
+    setJsonForm(jsonObject) {
+      if (typeof jsonObject !== 'object') {
+        throw new Error('The response is not a valid JSON object');
+      }
+      const validate = ajv.compile(this.asset_schema);
+      const valid = validate(jsonObject);
+
+      if (valid) {
+        this.asset = {...jsonObject};
+        this.formKey = Date.now();
+      } else {
+        const errors = validate.errors.map(err => `${err.instancePath} ${err.message}`).join(', ');
+        throw new Error(`Schema validation failed: ${errors}`);
+      }
+    },
+    onUploadedForm(event) {
+      const file = event.target.files[0];
+      if (file && file.type === "application/json") {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const jsonContent = JSON.parse(e.target.result);
+            this.setJsonForm(jsonContent);
+            this.alert_messages = [];
+            this.alert_messages.push({message: 'Form data filled successfully', alert_type: 'success'});
+          } catch (error) {
+            console.error("Invalid JSON file:", error);
+            alert("Invalid JSON file format.");
+          }
+        };
+        reader.readAsText(file);
+      } else {
+        this.alert_messages.push({message: 'Please select a valid JSON file.', alert_type: 'error'});
+      }
+    },
     set_asset_value(event) {
       this.asset = event;
     },

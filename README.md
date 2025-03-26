@@ -1,7 +1,6 @@
-# rapid-triples
+# rapid-triples for PKO
 
-Generate RDF using a form-based interface.
-Fork the template and configure it with your own form.
+Generate procedure in RDF compliant with the PKO ontology (https://w3id.org/pko) by using a form-based interface.
 
 ### Run it locally
 

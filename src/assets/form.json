@@ -1,94 +1,1251 @@
 {
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
-    "properties": {
-    "header": {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-            "identifier": {
-                "type": "string",
-                "title": "Identifier",
-                "description": "Identifier of the data source.",
-                "default": "MY_DATASOURCE"
-            },
-            "name": {
-                "type": "string",
-                "title": "Name",
-                "description": "Name of the data source",
-                "default": "My Data Source"
-            },
-            "description": {
-                "type": "string",
-                "title": "Description",
-                "description": "Description of the data contained in the data source",
-                "default": "My Data Source contains data about things."
-            },
-            "publisher_name": {
-                "type": "string",
-                "title": "Publisher name",
-                "description": "Name of the entity providing the data source",
-                "default": "Cefriel Data Publisher"
-            },
-            "publisher_email": {
-                "title": "Publisher email",
-                "type": "string",
-                "description": "Email of the entity providing the data source",
-                "default": "no-reply@cefriel.com"
-            },
-            "access_url": {
-                "type": "string",
-                "title": "Access URL",
-                "x-display": "hidden"
-            },
-            "creation_time": {
-                "type": "string",
-                "title": "Creation date",
-                "x-display": "hidden"
-            },
-            "last_updated": {
-                "type": "string",
-                "title": "Modification time",
-                "x-display": "hidden"
-            },
-            "type": {
-                "type": "string",
-                "title": "Type",
-                "x-display": "hidden"
-            },
-            "id": {
-                "type": "string",
-                "title": "Identifier",
-                "x-display": "hidden"
+    "x-display": "tabs",
+    "x-props": {
+        "grow": true
+    },
+    "allOf": [
+        {
+            "title": "Procedure metadata",
+            "description": "Description of the procedure metadata",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "title": "Procedure name",
+                    "default": "[PROCEDURE NAME]",
+                    "description": "Title of the procedure."
+                },
+                "description": {
+                    "type": "string",
+                    "x-display": "textarea",
+                    "title": "Description",
+                    "description": "Description of the procedure"
+                },
+                "isAdoptedBy": {
+                    "type": "string",
+                    "x-display": "textarea",
+                    "title": "Adopted by",
+                    "description": "Company adopting the procedure",
+                    "examples": ["ACME"]
+                },
+                "versionNumber": {
+                    "type": "string",
+                    "title": "Version number"
+                },
+                "keyword": {
+                    "type": "array",
+                    "title": "Keywords",
+                    "description": "Keywords of the procedure. Type and press Enter.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "hasProcedureTarget": {
+                    "title": "Target",
+                    "description": "Target of the procedure (i.e., machine/workstation).",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "machineType": {
+                                "type": "string",
+                                "description": "The type of machine targeted by the procedure",
+                                "title": "Machine type"
+                            },
+                            "title": {
+                                "type": "string",
+                                "description": "The name of the machine targeted by the procedure",
+                                "title": "Machine name"
+                            },
+                            "atLocation": {
+                                "type": "string",
+                                "description": "The location of the machine targeted by the procedure",
+                                "title": "Machine location"
+                            }
+                        }
+                    }
+                },
+                "references" : {
+                    "type": "array",
+                    "title": "Associated resources",
+                    "description": "Resources associated with the procedure.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Title",
+                                "description": "Title of the resource"
+                            },
+                            "format": {
+                                "type": "string",
+                                "examples": ["PDF", "Excel", "Word", "PNG", "JPEG"],
+                                "title": "Format",
+                                "description": "Format of the resource (cf. http://publications.europa.eu/resource/dataset/file-type)"
+                            },
+                            "resource": {
+                                "anyOf": [
+                                {
+                                    "title": "Remote Document",
+                                    "properties": {
+                                        "key": {
+                                            "const": "Remote",
+                                            "type": "string"
+                                        },
+                                        "url": {
+                                            "title": "URL",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                                ],
+                                "title": "Resource",
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "id": {
+                    "title": "Identifier",
+                    "type": "string",
+                    "x-display": "hidden"
+                },
+                "created": {
+                    "title": "Creation datetime",
+                    "type": "string",
+                    "x-display": "hidden"
+                },
+                "modified": {
+                    "title": "Modification datetime",
+                    "type": "string",
+                    "x-display": "hidden"
+                },
+                "status": {
+                    "title": "Status",
+                    "type": "string",
+                    "x-display": "hidden"
+                },
+                "type": {
+                    "title": "Type",
+                    "type": "string",
+                    "x-display": "hidden"
+                },
+                "user": {
+                    "title": "User",
+                    "type": "string",
+                    "x-display": "hidden"
+                }
+            }
+        },
+        {
+            "title": "Procedure Definition",
+            "description": "Description of the procedure steps",
+            "type": "object",
+            "properties": {
+                "hasStep": {
+                    "type": "array",
+                    "title": "List of steps",
+                    "description": "List of the steps of the procedure",
+                    "x-itemTitle": "title",
+                    "items": {
+                        "$ref": "#/$defs/Step"
+                    }
+                }
             }
         }
-    },
-    "content":  {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-            "distributions": {
-                "title": "Distributions",
-                "description": "A specific representation of a Dataset.",
-                "type": "array",
-                "items": {
+    ],
+    "$defs": {
+        "Step": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                "type": "string",
+                "title": "Step title"
+                },
+                "description": {
+                    "type": "string",
+                    "x-display": "textarea",
+                    "title": "Step description"
+                },
+                "isOptional": {
+                    "type": "boolean",
+                    "x-display": "switch",
+                    "title": "Toggle if the step is optional",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "isRepeatablePolicy": {
                     "type": "object",
-                    "properties": {
-                        "format": {
-                            "type": "string",
-                            "description": "The format used to encode the data in the distribution. The vocabulary http://publications.europa.eu/resource/dataset/file-type is recommended to serialise the admissible values ",
-                            "title": "Resource format",
-                            "default": "http://publications.europa.eu/resource/authority/file-type/CSV"
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "allOf": [{
+                        "properties": {
+                            "isRepeatable": {
+                                "type": "boolean",
+                                "x-display": "switch",
+                                "title": "Toggle if the step is repeatable"
+                            }
                         },
-                        "access_url": {
-                            "type": "string",
-                            "title": "Access URL.",
-                            "description": "URL redirecting to a webpage or an endpoint to access the data.",
-                            "default": "http://www.cefriel.com/data/my_data_source"
+                        "if": {
+                            "required": [
+                                "isRepeatable"
+                            ],
+                            "properties": {
+                                "isRepeatable": {
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "minRepetitions": {
+                                    "type": "integer",
+                                    "title": "Minimum number of repetitions",
+                                    "default": 1
+                                },
+                                "maxRepetitions": {
+                                    "type": "integer",
+                                    "title": "Maximum number of repetitions",
+                                    "default": 2
+                                }
+                            }
+                        }
+                    }]
+                },
+                "requiresFunction" : {
+                    "type": "array",
+                    "title": "Required functions",
+                    "description": "Functions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Function name",
+                                "description": "Name of the function"
+                            }
+                        }
+                    }
+                },
+                "requiresAction" : {
+                    "type": "array",
+                    "title": "Required actions by human",
+                    "description": "Actions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Action name",
+                                "description": "Name of the action"
+                            }
+                        }
+                    }
+                },
+                "hasInputVar" : {
+                    "type": "array",
+                    "title": "Input variables",
+                    "description": "Variables required as input by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasOutputVar" : {
+                    "type": "array",
+                    "title": "Output variables",
+                    "description": "Variables required as output by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the substeps",
+                    "title": "Substeps Policy",
+                    "enum": [ "Ordered", "Unordered" ]
+                },
+                "hasStep": {
+                    "type": "array",
+                    "title": "Substeps",
+                    "description": "List of the substeps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items":  {
+                        "$ref": "#/$defs/SubstepFinal"
+                    }
+                },
+                "nextStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the next steps",
+                    "title": "Next Steps Policy",
+                    "enum": [ "List", "Alternative" ],
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "hasNextStep": {
+                    "type": "array",
+                    "title": "Next steps",
+                    "description": "List of the next steps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "$ref": "#/$defs/Step2"
+                    }
+                }
+            }
+        },
+        "Step2": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                "type": "string",
+                "title": "Step title"
+                },
+                "description": {
+                    "type": "string",
+                    "x-display": "textarea",
+                    "title": "Step description"
+                },
+                "isOptional": {
+                    "type": "boolean",
+                    "x-display": "switch",
+                    "title": "Toggle if the step is optional",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "isRepeatablePolicy": {
+                    "type": "object",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "allOf": [{
+                        "properties": {
+                            "isRepeatable": {
+                                "type": "boolean",
+                                "x-display": "switch",
+                                "title": "Toggle if the step is repeatable"
+                            }
+                        },
+                        "if": {
+                            "required": [
+                                "isRepeatable"
+                            ],
+                            "properties": {
+                                "isRepeatable": {
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "minRepetitions": {
+                                    "type": "integer",
+                                    "title": "Minimum number of repetitions",
+                                    "default": 1
+                                },
+                                "maxRepetitions": {
+                                    "type": "integer",
+                                    "title": "Maximum number of repetitions",
+                                    "default": 2
+                                }
+                            }
+                        }
+                    }]
+                },
+                "requiresFunction" : {
+                    "type": "array",
+                    "title": "Required functions",
+                    "description": "Functions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Function name",
+                                "description": "Name of the function"
+                            }
+                        }
+                    }
+                },
+                "requiresAction" : {
+                    "type": "array",
+                    "title": "Required actions by human",
+                    "description": "Actions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Action name",
+                                "description": "Name of the action"
+                            }
+                        }
+                    }
+                },
+                "hasInputVar" : {
+                    "type": "array",
+                    "title": "Input variables",
+                    "description": "Variables required as input by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasOutputVar" : {
+                    "type": "array",
+                    "title": "Output variables",
+                    "description": "Variables required as output by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the substeps",
+                    "title": "Substeps Policy",
+                    "enum": [ "Ordered", "Unordered" ]
+                },
+                "hasStep": {
+                    "type": "array",
+                    "title": "Substeps",
+                    "description": "List of the substeps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items":  {
+                        "$ref": "#/$defs/SubstepFinal"
+                    }
+                },
+                "nextStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the next steps",
+                    "title": "Next Steps Policy",
+                    "enum": [ "List", "Alternative" ],
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "hasNextStep": {
+                    "type": "array",
+                    "title": "Next steps",
+                    "description": "List of the next steps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "$ref": "#/$defs/Step3"
+                    }
+                }
+            }
+        },
+        "Step3": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                "type": "string",
+                "title": "Step title"
+                },
+                "description": {
+                    "type": "string",
+                    "x-display": "textarea",
+                    "title": "Step description"
+                },
+                "isOptional": {
+                    "type": "boolean",
+                    "x-display": "switch",
+                    "title": "Toggle if the step is optional",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "isRepeatablePolicy": {
+                    "type": "object",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "allOf": [{
+                        "properties": {
+                            "isRepeatable": {
+                                "type": "boolean",
+                                "x-display": "switch",
+                                "title": "Toggle if the step is repeatable"
+                            }
+                        },
+                        "if": {
+                            "required": [
+                                "isRepeatable"
+                            ],
+                            "properties": {
+                                "isRepeatable": {
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "minRepetitions": {
+                                    "type": "integer",
+                                    "title": "Minimum number of repetitions",
+                                    "default": 1
+                                },
+                                "maxRepetitions": {
+                                    "type": "integer",
+                                    "title": "Maximum number of repetitions",
+                                    "default": 2
+                                }
+                            }
+                        }
+                    }]
+                },
+                "requiresFunction" : {
+                    "type": "array",
+                    "title": "Required functions",
+                    "description": "Functions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Function name",
+                                "description": "Name of the function"
+                            }
+                        }
+                    }
+                },
+                "requiresAction" : {
+                    "type": "array",
+                    "title": "Required actions by human",
+                    "description": "Actions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Action name",
+                                "description": "Name of the action"
+                            }
+                        }
+                    }
+                },
+                "hasInputVar" : {
+                    "type": "array",
+                    "title": "Input variables",
+                    "description": "Variables required as input by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasOutputVar" : {
+                    "type": "array",
+                    "title": "Output variables",
+                    "description": "Variables required as output by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the substeps",
+                    "title": "Substeps Policy",
+                    "enum": [ "Ordered", "Unordered" ]
+                },
+                "hasStep": {
+                    "type": "array",
+                    "title": "Substeps",
+                    "description": "List of the substeps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items":  {
+                        "$ref": "#/$defs/SubstepFinal"
+                    }
+                },
+                "nextStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the next steps",
+                    "title": "Next Steps Policy",
+                    "enum": [ "List", "Alternative" ],
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "hasNextStep": {
+                    "type": "array",
+                    "title": "Next steps",
+                    "description": "List of the next steps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "$ref": "#/$defs/Step4"
+                    }
+                }
+            }
+        },
+        "Step4": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                "type": "string",
+                "title": "Step title"
+                },
+                "description": {
+                    "type": "string",
+                    "x-display": "textarea",
+                    "title": "Step description"
+                },
+                "isOptional": {
+                    "type": "boolean",
+                    "x-display": "switch",
+                    "title": "Toggle if the step is optional",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "isRepeatablePolicy": {
+                    "type": "object",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "allOf": [{
+                        "properties": {
+                            "isRepeatable": {
+                                "type": "boolean",
+                                "x-display": "switch",
+                                "title": "Toggle if the step is repeatable"
+                            }
+                        },
+                        "if": {
+                            "required": [
+                                "isRepeatable"
+                            ],
+                            "properties": {
+                                "isRepeatable": {
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "minRepetitions": {
+                                    "type": "integer",
+                                    "title": "Minimum number of repetitions",
+                                    "default": 1
+                                },
+                                "maxRepetitions": {
+                                    "type": "integer",
+                                    "title": "Maximum number of repetitions",
+                                    "default": 2
+                                }
+                            }
+                        }
+                    }]
+                },
+                "requiresFunction" : {
+                    "type": "array",
+                    "title": "Required functions",
+                    "description": "Functions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Function name",
+                                "description": "Name of the function"
+                            }
+                        }
+                    }
+                },
+                "requiresAction" : {
+                    "type": "array",
+                    "title": "Required actions by human",
+                    "description": "Actions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Action name",
+                                "description": "Name of the action"
+                            }
+                        }
+                    }
+                },
+                "hasInputVar" : {
+                    "type": "array",
+                    "title": "Input variables",
+                    "description": "Variables required as input by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasOutputVar" : {
+                    "type": "array",
+                    "title": "Output variables",
+                    "description": "Variables required as output by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the substeps",
+                    "title": "Substeps Policy",
+                    "enum": [ "Ordered", "Unordered" ]
+                },
+                "hasStep": {
+                    "type": "array",
+                    "title": "Substeps",
+                    "description": "List of the substeps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items":  {
+                        "$ref": "#/$defs/SubstepFinal"
+                    }
+                },
+                "nextStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the next steps",
+                    "title": "Next Steps Policy",
+                    "enum": [ "List", "Alternative" ],
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "hasNextStep": {
+                    "type": "array",
+                    "title": "Next steps",
+                    "description": "List of the next steps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "$ref": "#/$defs/StepFinal"
+                    }
+                }
+            }
+        },
+        "StepFinal": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                "type": "string",
+                "title": "Step title"
+                },
+                "description": {
+                    "type": "string",
+                    "x-display": "textarea",
+                    "title": "Step description"
+                },
+                "isOptional": {
+                    "type": "boolean",
+                    "x-display": "switch",
+                    "title": "Toggle if the step is optional",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "isRepeatablePolicy": {
+                    "type": "object",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "allOf": [{
+                        "properties": {
+                            "isRepeatable": {
+                                "type": "boolean",
+                                "x-display": "switch",
+                                "title": "Toggle if the step is repeatable"
+                            }
+                        },
+                        "if": {
+                            "required": [
+                                "isRepeatable"
+                            ],
+                            "properties": {
+                                "isRepeatable": {
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "minRepetitions": {
+                                    "type": "integer",
+                                    "title": "Minimum number of repetitions",
+                                    "default": 1
+                                },
+                                "maxRepetitions": {
+                                    "type": "integer",
+                                    "title": "Maximum number of repetitions",
+                                    "default": 2
+                                }
+                            }
+                        }
+                    }]
+                },
+                "requiresFunction" : {
+                    "type": "array",
+                    "title": "Required functions",
+                    "description": "Functions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Function name",
+                                "description": "Name of the function"
+                            }
+                        }
+                    }
+                },
+                "requiresAction" : {
+                    "type": "array",
+                    "title": "Required actions by human",
+                    "description": "Actions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Action name",
+                                "description": "Name of the action"
+                            }
+                        }
+                    }
+                },
+                "hasInputVar" : {
+                    "type": "array",
+                    "title": "Input variables",
+                    "description": "Variables required as input by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasOutputVar" : {
+                    "type": "array",
+                    "title": "Output variables",
+                    "description": "Variables required as output by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the substeps",
+                    "title": "Substeps Policy",
+                    "enum": [ "Ordered", "Unordered" ]
+                },
+                "hasStep": {
+                    "type": "array",
+                    "title": "Substeps",
+                    "description": "List of the substeps",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items":  {
+                        "$ref": "#/$defs/SubstepFinal"
+                    }
+                }
+            }
+        },
+        "SubstepFinal": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                "type": "string",
+                "title": "Step title"
+                },
+                "description": {
+                    "type": "string",
+                    "x-display": "textarea",
+                    "title": "Step description"
+                },
+                "isOptional": {
+                    "type": "boolean",
+                    "x-display": "switch",
+                    "title": "Toggle if the step is optional",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    }
+                },
+                "isRepeatablePolicy": {
+                    "type": "object",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "allOf": [{
+                        "properties": {
+                            "isRepeatable": {
+                                "type": "boolean",
+                                "x-display": "switch",
+                                "title": "Toggle if the step is repeatable"
+                            }
+                        },
+                        "if": {
+                            "required": [
+                                "isRepeatable"
+                            ],
+                            "properties": {
+                                "isRepeatable": {
+                                    "const": true
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "minRepetitions": {
+                                    "type": "integer",
+                                    "title": "Minimum number of repetitions",
+                                    "default": 1
+                                },
+                                "maxRepetitions": {
+                                    "type": "integer",
+                                    "title": "Maximum number of repetitions",
+                                    "default": 2
+                                }
+                            }
+                        }
+                    }]
+                },
+                "requiresFunction" : {
+                    "type": "array",
+                    "title": "Required functions",
+                    "description": "Functions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Function name",
+                                "description": "Name of the function"
+                            }
+                        }
+                    }
+                },
+                "requiresAction" : {
+                    "type": "array",
+                    "title": "Required actions by human",
+                    "description": "Actions required by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Action name",
+                                "description": "Name of the action"
+                            }
+                        }
+                    }
+                },
+                "hasInputVar" : {
+                    "type": "array",
+                    "title": "Input variables",
+                    "description": "Variables required as input by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
+                        }
+                    }
+                },
+                "hasOutputVar" : {
+                    "type": "array",
+                    "title": "Output variables",
+                    "description": "Variables required as output by the step.",
+                    "x-options": {
+                        "hideInArrayItem": true
+                    },
+                    "x-itemTitle": "title",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "title"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "Name of the variable"
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
 }
