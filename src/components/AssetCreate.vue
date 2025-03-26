@@ -2,21 +2,16 @@
   <div>
     <v-row class="px-10 my-2">
       <v-col cols="8" class="py-2">
-        <p>Fill the form to obtain a procedure compliant with the <a href="https://w3id.org/pko">PKO ontology</a>.<br><br>
-          The page is client-side only so all the information inserted are not collected/stored but can not be retrieved
-          if the page is reloaded without downloading the content. The output RDF can be converted to different serializations.<br><br>
-          This page is powered by <b>KCONG (Knowledge Catalogue and Governance)</b> a complete (meta)data catalogue
+        <p><b>Fill the form to obtain a procedure compliant with the <a href="https://w3id.org/pko">PKO ontology</a></b>.
+          This page is powered by KCONG (Knowledge Catalogue and Governance) a complete (meta)data catalogue
           solution developed by <a href="https://www.cefriel.com/">Cefriel</a>. If you want to know more visit <a
-              href="https://kcong.cefriel.com/">https://kcong.cefriel.com/</a>.</p>
-      </v-col>
-    </v-row>
-
-    <v-row class="px-10 mt-6 mb-10">
-      <v-col cols="8">
+              href="https://kcong.cefriel.com/">https://kcong.cefriel.com/</a>.
+        </p>
+        <p>You can use buttons below to <i>Download</i> the content of the form, or to <i>Upload</i> the content of a form previously downloaded.</p>
         <v-row>
           <v-btn @click="initForm" class="ml-2 mt-2 mr-4">
             <v-icon left>mdi-upload</v-icon>
-            Initialise Form
+            Upload
           </v-btn>
           <input ref="formInput" type="file" accept="application/json" style="display:none" @change="onUploadedForm">
           <v-btn @click="downloadForm" class="mt-2">
