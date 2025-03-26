@@ -13,17 +13,15 @@
         <v-toolbar-title>{{app_name}}</v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <router-link
-            to="/"
-            >
+        <a href="https://perks-project.eu/" target="_blank">
             <v-img
                 class="mx-2"
                 v-bind:src="project_logo"
-                max-height="40"
-                max-width="100"
+                max-height="150"
+                max-width="180"
                 contain
                 />
-        </router-link>
+        </a>
     </v-app-bar>
 </template>
 

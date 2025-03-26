@@ -3,11 +3,11 @@
     <v-row class="px-10 my-2">
       <v-col cols="8" class="py-2">
         <p><b>Fill the form to obtain a procedure compliant with the <a href="https://w3id.org/pko">PKO ontology</a></b>.
-          This page is powered by KCONG (Knowledge Catalogue and Governance) a complete (meta)data catalogue
-          solution developed by <a href="https://www.cefriel.com/">Cefriel</a>. If you want to know more visit <a
-              href="https://kcong.cefriel.com/">https://kcong.cefriel.com/</a>.
+          This page is powered by <a
+          href="https://kcong.cefriel.com/">KCONG</a> (Knowledge Catalogue and Governance) a complete (meta)data catalogue
+          solution developed by <a href="https://www.cefriel.com/">Cefriel</a> and customised for the <a href="https://perks-project.eu/">PERKS</a> project.
         </p>
-        <p>You can use buttons below to <i>Download</i> the content of the form, or to <i>Upload</i> the content of a form previously downloaded.</p>
+        <p>You can use the buttons below to <i>Download</i> the content of the form, or to <i>Upload</i> the content of a form previously downloaded.</p>
         <v-row>
           <v-btn @click="initForm" class="ml-2 mt-2 mr-4">
             <v-icon left>mdi-upload</v-icon>
