@@ -6,15 +6,15 @@ Generate procedure in RDF compliant with the PKO ontology (https://w3id.org/pko)
 
 Build the image
 ```sh
-docker build -f Dockerfile-build --no-cache -t cefriel/rapid-triples .
+docker build -f Dockerfile-build --no-cache -t cefriel/pko-rapid-triples .
 ```
 
 Run the image
 ```sh
-docker run -p 8080:80 cefriel/rapid-triples
+docker run -p 8080:80 cefriel/pko-rapid-triples
 ```
 
-Visit http://localhost:8080.
+Visit http://localhost:8080/pko-rapid-triples.
 
 ### Update online
 
