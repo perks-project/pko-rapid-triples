@@ -50,7 +50,7 @@
                 :value.prop="saved_asset_rdf"
                 :format="selectedFormat"
                 :readonly=true
-                :prefixes="editorPrefixes"
+                :customPrefixes="editorPrefixes"
                 auto-parse
                 parse-delay="1000"
                 @parsing-failed="onParsingFailed"
@@ -104,7 +104,7 @@ export default {
       parseError: null,
       formats: [...parsers.keys()],
       selectedFormat: 'text/turtle', // Default format
-      editorPrefixes: null,
+      editorPrefixes: {},
       options: {
         ajv: ajv,
         context: {
@@ -124,9 +124,8 @@ export default {
       this.parseError = e.detail.error;
     },
     onPrefixesParsed(e) {
-      // Supported prefixes at https://github.com/zazuko/rdf-vocabularies/tree/master/ontologies
       if (!this.editorPrefixes) {
-        this.editorPrefixes = Object.keys(e.detail.prefixes).join(",");
+        this.editorPrefixes = e.detail.prefixes;
       }
     },
     onSerialized(e) {
