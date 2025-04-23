@@ -47,14 +47,12 @@
 
             <rdf-editor
                 class="h-full overflow-hidden"
-                :value.prop="saved_asset_rdf"
+                :value="saved_asset_rdf"
                 :format="selectedFormat"
                 :readonly=true
-                :customPrefixes="editorPrefixes"
                 auto-parse
-                parse-delay="1000"
+                parse-delay="0"
                 @parsing-failed="onParsingFailed"
-                @prefixes-parsed="onPrefixesParsed"
                 @serialized="onSerialized"
             ></rdf-editor>
 
@@ -103,8 +101,7 @@ export default {
       formKey: 0,
       parseError: null,
       formats: [...parsers.keys()],
-      selectedFormat: 'text/turtle', // Default format
-      editorPrefixes: {},
+      selectedFormat: "text/turtle", // Default format
       options: {
         ajv: ajv,
         context: {
@@ -122,11 +119,6 @@ export default {
     onParsingFailed(e) {
       console.error('Parsing failed:', e.detail.error);
       this.parseError = e.detail.error;
-    },
-    onPrefixesParsed(e) {
-      if (!this.editorPrefixes) {
-        this.editorPrefixes = e.detail.prefixes;
-      }
     },
     onSerialized(e) {
       this.serialized_rdf = e.detail.value;
@@ -244,6 +236,7 @@ export default {
       }
 
       try {
+        this.selectedFormat = "text/turtle";
         this.saved_asset_rdf = this.template.render({
           obj: this.asset,
           data_platform_url: "https://kcong.cefriel.com/",
