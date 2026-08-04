@@ -1,0 +1,126 @@
+{
+    "title": "Example Procedure",
+    "versionNumber": "0.0.1",
+    "description": "This is an example procedure",
+    "isAdoptedBy": "Cefriel",
+    "keyword": [
+        "test",
+        "example",
+        "PKO"
+    ],
+    "hasProcedureTarget": [
+        {
+            "type": "Software",
+            "title": "PKMS",
+            "atLocation": "https://pkms.dev.perks-project.net/"
+        }
+    ],
+    "references": [
+        {
+            "resourceType": "remote",
+            "resource": {
+                "url": "https://doi.org/10.5281/zenodo.18340820",
+                "title": "PERKS D4.2",
+                "format": "URL"
+            }
+        }
+    ],
+    "hasRequirement": [
+        {
+            "type": "mandatory",
+            "title": "PKMS short course attendance required",
+            "description": "Users must complete the PKMS short course before executing this procedure.",
+            "requiredEntityType": "qualification",
+            "requiredEntity": "Introduction to hands-on session to test PERKS tools for Procedure Collection"
+        }
+    ],
+    "hasStep": [
+        {
+            "hasStepPolicy": "Ordered",
+            "title": "Open the PKMS",
+            "description": "Use the link to connect to an instance of the PKMS",
+            "requiresAction": [
+                "Visit Website"
+            ],
+            "hasInputVar": [
+                "Link"
+            ]
+        },
+        {
+            "hasStepPolicy": "Ordered",
+            "title": "Login into the PKMS",
+            "description": "Get access to PKMS via login",
+            "hasStep": [
+                {
+                    "title": "Add you username"
+                },
+                {
+                    "title": "Add your password"
+                }
+            ]
+        },
+        {
+            "hasStepPolicy": "Unordered",
+            "title": "Discover the PKMS",
+            "description": "Check the PKMS functionalities",
+            "hasStep": [
+                {
+                    "hasStepPolicy": "Ordered",
+                    "isOptional": true,
+                    "title": "Visit catalogue of procedures",
+                    "hasStep": [
+                        {
+                            "hasStepPolicy": "Ordered",
+                            "title": "Apply filters"
+                        },
+                        {
+                            "hasStepPolicy": "Ordered",
+                            "title": "Select a Procedure"
+                        }
+                    ]
+                },
+                {
+                    "hasStepPolicy": "Ordered",
+                    "isOptional": true,
+                    "title": "Create new procedure",
+                    "hasRequirement": [
+                        {
+                            "type": "mandatory",
+                            "title": "Procedure editor role required",
+                            "description": "The user must have the procedure editor role to create a new procedure.",
+                            "requiredEntityType": "role",
+                            "requiredEntity": "procedure editor"
+                        }
+                    ],
+                    "hasStep": [
+                        {
+                            "hasStepPolicy": "Ordered",
+                            "title": "Enter Asset Catalogue"
+                        },
+                        {
+                            "hasStepPolicy": "Ordered",
+                            "title": "Click Create Button"
+                        },
+                        {
+                            "hasStepPolicy": "Ordered",
+                            "title": "Fill the form"
+                        },
+                        {
+                            "hasStepPolicy": "Ordered",
+                            "title": "Click Save Button"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "hasStepPolicy": "Ordered",
+            "title": "Logout from PKMS"
+        }
+    ],
+    "id": "example-procedure",
+    "type": "demo",
+    "created": "2026-04-08T15:56:07.350Z",
+    "modified": "2026-04-08T16:58:05.404Z",
+    "status": "Draft"
+}

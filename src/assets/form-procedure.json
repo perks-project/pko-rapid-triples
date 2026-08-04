@@ -46,6 +46,10 @@
             "layout": "textarea",
             "title": "Description",
             "description": "Description of the procedure"
+        },    
+        "type": {
+            "title": "Type of Procedure",
+            "type": "string"
         },
         "isAdoptedBy": {
             "type": "string",
@@ -106,11 +110,6 @@
                 "Approved",
                 "Deprecated"
             ]
-        },
-        "type": {
-            "title": "Type",
-            "type": "string",
-            "const": "Procedure"
         },
         "created": {
             "title": "Creation datetime",

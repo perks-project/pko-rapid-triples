@@ -1,6 +1,5 @@
 {%- set prefix="https://perks-project.eu/data/" -%}
 {%- set procedure_iri = '<' + prefix + slugify(obj.title) + '>' -%}
-{%- set user_iri = '<' + prefix + 'user/' + slugify(obj.user) + '>' -%}
 
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -298,7 +297,6 @@ a pplan:Step .
 
   dcterms:identifier "{{obj.id}}" ;
   adms:status pko:{{slugify(obj.status) | capitalize }} ;
-  dcterms:creator {{user_iri | safe}} ; 
   dcterms:created "{{obj.created}}"^^xsd:dateTime ;
   dcterms:modified "{{obj.modified}}"^^xsd:dateTime .
 
