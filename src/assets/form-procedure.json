@@ -1,0 +1,391 @@
+{   
+    "type": "object",
+    "layout": {
+        "comp": "tabs",
+        "options": {
+            "readOnlyPropertiesMode": "show"
+        },
+        "children": [
+            {
+                "title": "Procedure Metadata",
+                "children": [
+                    "id",
+                    "title",
+                    "description",
+                    "isAdoptedBy",
+                    "versionNumber",
+                    "keyword",
+                    "hasProcedureTarget",
+                    "references",
+                    "status",
+                    "created",
+                    "modified"
+                ]
+            },
+            {
+                "title": "Procedure Definition",
+                "children": [
+                    "hasRequirement",
+                    "hasStep"
+                ]
+            }
+        ]
+    },
+    "properties": {
+        "id": {
+            "title": "Identifier",
+            "type": "string"
+        },
+        "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Title of the procedure."
+        },
+        "description": {
+            "type": "string",
+            "layout": "textarea",
+            "title": "Description",
+            "description": "Description of the procedure"
+        },
+        "isAdoptedBy": {
+            "type": "string",
+            "title": "Adopted by"
+        },
+        "keyword": {
+            "type": "array",
+            "title": "Keywords",
+            "description": "Keywords of the procedure. Type and press Enter.",
+            "items": {
+                "type": "string"
+            }
+        },
+        "hasProcedureTarget": {
+            "title": "Target",
+            "description": "Target of the procedure (e.g., machine/workstation/software).",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The type of target of the procedure",
+                        "title": "Target type"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "The name of the target of the procedure",
+                        "title": "Target name"
+                    },
+                    "atLocation": {
+                        "type": "string",
+                        "description": "The location of the target of the procedure",
+                        "title": "Target location"
+                    }
+                }
+            }
+        },
+        "hasRequirement": {
+            "title": "Requirements",
+            "description": "Requirements to be satisfied in order for the procedure to be executed.",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/requirement"
+            }
+        },
+        "references" : {
+            "$ref": "#/$defs/references"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "examples": [
+                "Draft",
+                "Revision",
+                "Validation",
+                "Approval",
+                "Approved",
+                "Deprecated"
+            ]
+        },
+        "type": {
+            "title": "Type",
+            "type": "string",
+            "const": "Procedure"
+        },
+        "created": {
+            "title": "Creation datetime",
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "layout": {
+                "cols": 6
+            }
+        },
+        "modified": {
+            "title": "Modification datetime",
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "layout": {
+                "cols": 6
+            }
+        },
+        "versionNumber": {
+            "type": "string",
+            "title": "Version Number"
+        },
+        "hasStep": {
+            "title": "List of steps",
+            "description": "List of the steps of the procedure",
+            "layout": {
+                "listEditMode": "inline-single",
+                "clipboardKey": "procedureStep"
+            },
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/step"
+            }
+        }
+    },
+    "$defs": {
+        "step": {
+            "type": "object",
+            "layout": {
+                "switch": [
+                  {
+                    "if": "summary",
+                    "children": ["title"]
+                  }
+                ]
+            },
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                  "type": "string",
+                  "title": "Step title"
+                },
+                "description": {
+                    "type": "string",
+                    "layout": "textarea",
+                    "title": "Step description"
+                },
+                "isOptional": {
+                    "type": "boolean",
+                    "title": "Toggle if the step is optional",
+                    "layout": {
+                        "cols": 6
+                    }
+                },
+                "isRepeatable": {
+                    "type": "boolean",
+                    "title": "Toggle if the step is repeatable",
+                    "layout": {
+                        "cols": 6
+                    }
+                },
+                "isRepeatablePolicy": {
+                  "type": "object",
+                  "layout": {
+                    "if": {
+                      "expr": "parent.data?.isRepeatable",
+                      "pure": false
+                    }
+                  },  
+                  "properties": {
+                      "minRepetitions": {
+                            "type": "integer",
+                            "title": "Minimum number of repetitions",
+                            "default": 1,
+                            "layout": {
+                                "cols": 6
+                            }
+                      },
+                      "maxRepetitions": {
+                            "type": "integer",
+                            "title": "Maximum number of repetitions",
+                            "default": 2,
+                            "layout": {
+                                "cols": 6
+                            }
+                      }
+                  }
+                },
+                "requiresAction" : {
+                    "type": "array",
+                    "title": "Required actions by human",
+                    "description": "Actions required by the step.",
+                    "items": {
+                      "type": "string",
+                      "title": "Action name",
+                      "description": "Name of the action"
+                    },
+                    "layout": {
+                        "cols": 6
+                    }
+                },
+                "requiresFunction" : {
+                    "type": "array",
+                    "title": "Required functions",
+                    "description": "Functions required by the step.",
+                    "items": {
+                      "type": "string",
+                      "title": "Function name",
+                      "description": "Name of the function"
+                    },
+                    "layout": {
+                        "cols": 6
+                    }
+                },
+                "hasInputVar" : {
+                    "type": "array",
+                    "title": "Input variables",
+                    "description": "Variables required as input by the step.",
+                    "items": {
+                      "type": "string",
+                      "title": "Variable name",
+                      "description": "Name of the variable"
+                    },
+                    "layout": {
+                        "cols": 6
+                    }
+                },
+                "hasOutputVar" : {
+                    "type": "array",
+                    "title": "Output variables",
+                    "description": "Variables required as output by the step.",
+                    "items": {
+                      "type": "string",
+                      "title": "Variable name",
+                      "description": "Name of the variable"
+                    },
+                    "layout": {
+                        "cols": 6
+                    }
+                },
+                "hasRequirement": {
+                    "title": "Requirements",
+                    "description": "Requirements to be satisfied in order for the step to be executed.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/requirement"
+                    }
+                },
+                "references": {
+                  "$ref": "#/$defs/references"
+                },
+                "hasStepPolicy": {
+                    "type": "string",
+                    "description": "Policy of execution for the substeps",
+                    "title": "Substeps Policy",
+                    "enum": [ "Ordered", "Unordered" ],
+                    "default": "Ordered"
+                },
+                "hasStep": {
+                    "type": "array",
+                    "title": "Substeps",
+                    "description": "List of the substeps",
+                    "layout": {
+                        "listEditMode": "dialog"
+                    },
+                    "items": {
+                        "$ref": "#/$defs/step"
+                    }
+                }
+            }
+        },
+        "references" : {
+            "type": "array",
+            "title": "Associated resources",
+            "description": "Local or remote resources associated with the entity.",
+            "items": {
+                "type": "object",
+                "layout": {
+                "options": {
+                    "density": "compact"
+                },
+                "switch": [
+                    {
+                        "if": "summary",
+                        "children": ["resource"]
+                    }
+                ]
+                },
+                "required": ["resourceType", "resource"],
+                "properties": {
+                    "resourceType": {
+                        "type": "string",
+                        "title": "Select the type of resource",
+                        "const": "remote"
+                    },
+                    "resource": {
+                        "title": "Resource",
+                        "type": "object",
+                        "required": ["title", "url"],
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "title": "Title",
+                                "description": "Title of the resource"
+                            },
+                            "format": {
+                                "title": "Format",
+                                "type": "string",
+                                "description": "Format of the resource (cf. http://publications.europa.eu/resource/dataset/file-type)",
+                                "examples": [
+                                    "PDF",
+                                    "Excel",
+                                    "Word",
+                                    "PNG",
+                                    "JPEG"
+                                ]
+                            },
+                            "url": {
+                                "title": "URL",
+                                "type": "string",
+                                "description": "URL of the resource"
+                            }
+                      }
+                    }
+                }
+            }
+        },
+        "requirement": {
+            "type": "object",
+            "required": ["requiredEntity"],
+            "properties": {
+                "requiredEntityType": {
+                    "type": "string",
+                    "description": "The type of the entity required (e.g., qualification)",
+                    "title": "Type of required entity",
+                    "examples": [
+                        "qualification",
+                        "role",
+                        "other"
+                    ]
+                },
+                "requiredEntity": {
+                    "type": "string",
+                    "description": "The entity required (e.g., master in mechanical engineering)",
+                    "title": "Required entity"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "The type of requirement (e.g., mandatory, optional, recommended)",
+                    "title": "Requirement type"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The name of the requirement",
+                    "title": "Requirement name"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The description of the requirement",
+                    "title": "Requirement description"
+                }
+            }
+        }
+    }
+}

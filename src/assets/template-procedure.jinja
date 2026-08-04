@@ -1,0 +1,322 @@
+{%- set prefix="https://perks-project.eu/data/" -%}
+{%- set procedure_iri = '<' + prefix + slugify(obj.title) + '>' -%}
+{%- set user_iri = '<' + prefix + 'user/' + slugify(obj.user) + '>' -%}
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix schema: <https://schema.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix pro: <http://purl.org/spar/pro/> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix m4ing: <http://w3id.org/nfdi4ing/metadata4ing#> .
+@prefix pplan: <http://purl.org/net/p-plan#> .
+@prefix onlim: <https://vocab.sti2.at/ds/> .
+@prefix pko: <https://w3id.org/pko#> .
+@prefix pkdata: <{{prefix}}> .
+@prefix pko-ind: <https://w3id.org/pko/industry#> .
+
+{# MACRO RENDER REFERENCES #}
+{% macro renderReferences(references) %}
+  {% for ref in references %}
+  {% if ref.resource %}
+  dcterms:references [
+    {% if ref.resource.title %}
+    dcterms:title """{{ref.resource.title}}""";
+    {% endif %}
+    {% if ref.resource.format %}
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/{{ref.format}}> ;
+    {% endif %}
+    dcat:accessURL <{{ref.resource.url}}> ;
+    a dcat:Resource
+  ] ;
+  {% endif %}
+  {% endfor %}
+{% endmacro %}
+
+{# MACRO RENDER FUNCTIONS #}
+{% macro renderFunction(function) %}
+{%- set function_iri = '<' + prefix + 'Function/' + slugify(function) + '>' -%}
+{{function_iri | safe}} a pko:Function ;
+  dcterms:title "{{function}}"^^xsd:string .
+{% endmacro %}
+
+{# MACRO RENDER ACTIONS #}
+{% macro renderAction(action) %}
+{%- set action_iri = '<' + prefix + 'Action/' + slugify(action) + '>' -%}
+{{action_iri | safe}} a pko:Action ;
+  dcterms:title "{{action}}"^^xsd:string .
+{% endmacro %}
+
+{# MACRO RENDER INPUT/OUTPUT VARIABLES #}
+{% macro renderVar(var) %}
+{%- set var_iri = '<' + prefix + 'Variable/' + slugify(var) + '>' -%}
+{{var_iri | safe}} a pplan:Variable ;
+  dcterms:title "{{var}}"^^xsd:string .
+{% endmacro %}
+
+{# MACRO RENDER REQUIRED ENTITY #}
+{% macro renderRequiredEntityDefinition(requirement) %}
+{%- set required_entity_iri = '<' + prefix + 'RequiredEntity/' + slugify(requirement.requiredEntity) + '>' -%}
+{% set required_entity_type = requirement.requiredEntityType|default('')|lower %}
+{{required_entity_iri | safe}}
+  {% if required_entity_type == 'qualification' %}
+  a pko:Qualification ;
+  {% elif required_entity_type == 'role' %}
+  a pro:Role ;
+  {% else %}
+  a prov:Entity ;
+  {% endif %}
+  dcterms:title "{{requirement.requiredEntity}}"^^xsd:string .
+{% endmacro %}
+
+{# MACRO RENDER REQUIREMENT #}
+{% macro renderRequirement(requirement) %}
+{%- set required_entity_iri = '<' + prefix + 'RequiredEntity/' + slugify(requirement.requiredEntity) + '>' -%}
+[ 
+  {% if requirement.title %}
+  dcterms:title "{{requirement.title}}"^^xsd:string ;
+  {% endif %}
+  {% if requirement.description %}
+  dcterms:description "{{requirement.description}}"^^xsd:string ;
+  {% endif %}
+  {% if requirement.type %}
+  pko:hasRequirementType pkdata:RequirementType\/{{requirement.type}} ;
+  {% endif %}
+  pko:requiredEntity {{required_entity_iri | safe}}
+]
+{% endmacro %}
+
+{# MACRO RENDER STEP - identifier and @id are pre-computed #}
+{% macro renderStep(step) %}
+
+{% if step.hasReferenceProcedure %}
+<{{step.hasReferenceProcedure | safe}}> onlim:compliesWith <https://semantify.it/ds/LqnDrczMkpxx> ;
+a pplan:MultiStep .
+{% else %}
+
+{# RENDER ALL FUNCTIONS #}
+{% if step.requiresFunction %}
+  {% for function in step.requiresFunction %}
+  {{ renderFunction(function) }}
+  {% endfor %}
+{% endif %}
+
+{# RENDER ALL ACTIONS #}
+{% if step.requiresAction %}
+  {% for action in step.requiresAction %}
+  {{ renderAction(action) }}
+  {% endfor %}
+{% endif %}
+
+{# RENDER ALL VARIABLES #}
+{% if step.hasInputVar %}
+  {% for var in step.hasInputVar %}
+  {{ renderVar(var) }}
+  {% endfor %}
+{% endif %}
+{% if step.hasOutputVar %}
+  {% for var in step.hasOutputVar %}
+  {{ renderVar(var) }}
+  {% endfor %}
+{% endif %}
+
+{# RENDER THE STEP #}
+<{{step['@id'] | safe}}> 
+  {% if step.title %}
+  dcterms:title "{{step.title}}"^^xsd:string ;
+  {% endif %}
+  {% if step.stepNumber %}
+  pko:stepNumber "{{ step.stepNumber }}"^^xsd:float ;
+  {% endif %}
+  {% if step.description %}
+  dcterms:description """{{step.description}}"""^^xsd:string ;
+  {% endif %}
+
+{% if step.isRepeatablePolicy %}
+  {% if step.isRepeatablePolicy.minRepetitions %} 
+  pko:minRepetitions {{step.isRepeatablePolicy.minRepetitions}} ;
+  {% endif %}
+  {% if step.isRepeatablePolicy.maxRepetitions %} 
+  pko:maxRepetitions {{step.isRepeatablePolicy.maxRepetitions}} ;
+  {% endif %}
+{% else %}
+  {% if step.isOptional %}
+  pko:minRepetitions 0 ;
+  {% endif %}
+{% endif %}
+
+{% if step.isStepForExpertiseLevel %}
+  pko:isStepForExpertiseLevel pkdata:ExpertiseLevel\/{{step.isStepForExpertiseLevel}} ;
+{% endif %}
+
+{% if step.references %}
+{{ renderReferences(step.references) }}
+{% endif %}
+
+{% if step.requiresFunction %}
+  {% for function in step.requiresFunction %}
+  {%- set function_iri = '<' + prefix + 'Function/' + slugify(function) + '>' -%}
+  pko:requiresFunction {{function_iri | safe}} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.requiresAction %}
+  {% for action in step.requiresAction %}
+  {%- set action_iri = '<' + prefix + 'Action/' + slugify(action) + '>' -%}
+  pko:requiresAction {{action_iri | safe}} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.hasInputVar %}
+  {% for var in step.hasInputVar %}
+  {%- set var_iri = '<' + prefix + 'Variable/' + slugify(var) + '>' -%}
+  pplan:hasInputVar {{var_iri | safe}} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.hasOutputVar %}
+  {% for var in step.hasOutputVar %}
+  {%- set var_iri = '<' + prefix + 'Variable/' + slugify(var) + '>' -%}
+  pplan:hasOutputVar {{var_iri | safe}} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.hasRequirement %}
+  {% for requirement in step.hasRequirement %}
+  pko:hasRequirement {{ renderRequirement(requirement) }} ;
+  {% endfor %}
+{% endif %}
+
+{% if step.hasStepVerification %}
+  {% for vf in step.hasStepVerification %}
+  pko:hasStepVerification [
+    a pko:StepVerification ;
+    dcterms:title "{{vf.title}}";
+    {% if vf.description %}
+    dcterms:description """{{vf.description}}"""^^xsd:string ;
+    {% endif %}
+  ] ;
+  {% endfor %}
+{% endif %}
+
+dcterms:identifier "{{step.identifier}}"^^xsd:string .
+
+{% if step.hasRequirement %}
+  {% for requirement in step.hasRequirement %}
+  {{ renderRequiredEntityDefinition(requirement) }}
+  {% endfor %}
+{% endif %}
+
+{# Check if this is a multistep or simple step #}
+{% if step.hasStep | length > 0 %}
+{# Reference shape for MultiStep #}
+<{{step['@id'] | safe}}> onlim:compliesWith <https://semantify.it/ds/LqnDrczMkpxx> ;
+a pplan:MultiStep .
+
+{% if step.hasStepPolicy == 'Ordered' %}
+{# Render ORDERED sub-steps #}
+{% for substep in step.hasStep %}
+  <{{step['@id'] | safe}}> pko:hasStep <{{substep['@id'] | safe}}> .
+  {% if loop.index == 1 %}
+    <{{step['@id'] | safe}}> pko:hasFirstStep <{{substep['@id'] | safe}}> .
+  {% endif %}
+  {% if loop.index > 1 %}
+  {%- set prev_substep = step.hasStep[loop.index - 2] -%}
+    <{{prev_substep['@id'] | safe}}> pko:nextStep <{{substep['@id'] | safe}}> .
+  {% endif %}
+  {{ renderStep(substep) }}
+{% endfor %}
+{% else %}
+{# Render UNORDERED sub-steps #}
+{% for substep in step.hasStep %}
+  <{{step['@id'] | safe}}> pko:hasStep <{{substep['@id'] | safe}}> .
+  {{ renderStep(substep) }}
+{% endfor %}
+{% endif %}
+
+{% else %}
+{# Reference shape for simple Step #}
+<{{step['@id'] | safe}}> onlim:compliesWith <https://semantify.it/ds/gFBlAqMqgdhR> ;
+a pplan:Step .
+{% endif %}
+
+{% endif %}
+{% endmacro %}
+
+{# RENDER MAIN PROCEDURE #}
+{{procedure_iri | safe}} a pko:Procedure ;
+  {# Reference shape #}
+  onlim:compliesWith <https://semantify.it/ds/fcKvHmTCPrxp> ;
+  dcterms:title "{{obj.title}}"^^xsd:string ;
+  {% if obj.description %}
+  dcterms:description """{{obj.description}}"""^^xsd:string ;
+  {% endif %}
+  {% if obj.isAdoptedBy %}
+  pko:isAdoptedBy pkdata:{{slugify(obj.isAdoptedBy)}} ;
+  {% endif %}
+  
+  {% if obj.type %}
+  pko:hasProcedureType pkdata:ProcedureType\/{{obj.type}} ;
+  {% endif %}
+
+  {% if obj.versionNumber %}
+  pko:versionNumber "{{obj.versionNumber}}"^^xsd:string ;
+  {% endif %}
+  
+  {% if obj.hasProcedureTarget %}
+  {% for target in obj.hasProcedureTarget %}
+  pko:hasProcedureTarget [
+    dcterms:title "{{target.title}}"^^xsd:string ;
+    dcterms:type "{{target.type}}"^^xsd:string ;
+    prov:atLocation "{{target.atLocation}}"^^xsd:string ;
+  ] ;
+  {% endfor %}
+  {% endif %}
+
+  {% if obj.hasRequirement %}
+  {% for requirement in obj.hasRequirement %}
+  pko:hasRequirement {{ renderRequirement(requirement) }} ;
+  {% endfor %}
+  {% endif %}
+
+  {% if obj.references %}
+  {{ renderReferences(obj.references) }}
+  {% endif %}
+
+  {% if obj.keyword %}
+  {% for keyword in obj.keyword %}
+  dcat:keyword "{{keyword}}"^^xsd:string ;
+  {% endfor %}
+  {% endif %}
+
+  dcterms:identifier "{{obj.id}}" ;
+  adms:status pko:{{slugify(obj.status) | capitalize }} ;
+  dcterms:creator {{user_iri | safe}} ; 
+  dcterms:created "{{obj.created}}"^^xsd:dateTime ;
+  dcterms:modified "{{obj.modified}}"^^xsd:dateTime .
+
+{% if obj.hasRequirement %}
+  {% for requirement in obj.hasRequirement %}
+  {{ renderRequiredEntityDefinition(requirement) }}
+  {% endfor %}
+{% endif %}
+
+{# RENDER ALL PROCEDURE STEPS #}
+{% for step in obj.hasStep %}
+{{procedure_iri | safe}} pko:hasStep <{{step['@id'] | safe}}> .
+{% if loop.index == 1 %}
+{{procedure_iri | safe}} pko:hasFirstStep <{{step['@id'] | safe}}> .
+{% endif %}
+{% if loop.index > 1 %}
+{%- set prev_step = obj.hasStep[loop.index - 2] -%}
+<{{prev_step['@id'] | safe}}> pko:nextStep <{{step['@id'] | safe}}> .
+{% endif %}
+{{ renderStep(step) }}
+{% endfor %}
